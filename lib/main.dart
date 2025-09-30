@@ -1,4 +1,7 @@
+import 'package:fam_assignment/utils/routes/routes.dart';
+import 'package:fam_assignment/utils/routes/routes_name.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,14 +12,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // return
+    // MultiProvider(
+    // providers: [],
+    // child: MaterialApp(
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: "Fam Assignment",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      initialRoute: RoutesName.home,
+      onGenerateRoute: Routes.generateRoute,
     );
+    // ),
+    // );
   }
 }
 
