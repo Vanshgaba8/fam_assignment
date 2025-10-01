@@ -12,27 +12,33 @@ import 'package:flutter_svg/flutter_svg.dart';
 class HC1CardWrapper extends StatelessWidget {
   final List<Cards> cards;
   final bool isScrollable;
+  final double? height;
 
   const HC1CardWrapper({
     super.key,
     required this.cards,
     required this.isScrollable,
+    this.height,
   });
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final cardSpacing = 15.0;
+    final cardHeight = height ?? 64.0;
 
     return SingleChildScrollView(
       scrollDirection: isScrollable ? Axis.horizontal : Axis.vertical,
       child: Row(
         children:
-            cards.map((card) {
+            cards.asMap().entries.map((entry) {
+              final index = entry.key;
+              final card = entry.value;
+
               double cardWidth;
 
               if (cards.length == 1) {
-                cardWidth = screenWidth;
+                cardWidth = screenWidth - (cardSpacing * 2);
               } else if (!isScrollable) {
                 cardWidth =
                     (screenWidth - (cards.length + 1) * cardSpacing) /
@@ -41,9 +47,16 @@ class HC1CardWrapper extends StatelessWidget {
                 cardWidth = screenWidth * 0.64;
               }
 
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: cardSpacing / 2),
-                child: SizedBox(width: cardWidth, child: HC1Card(card: card)),
+              return Container(
+                margin: EdgeInsets.only(
+                  left: index == 0 ? cardSpacing : cardSpacing / 2,
+                  right:
+                      index == cards.length - 1 ? cardSpacing : cardSpacing / 2,
+                ),
+                child: SizedBox(
+                  width: cardWidth,
+                  child: HC1Card(card: card, height: cardHeight),
+                ),
               );
             }).toList(),
       ),
@@ -53,14 +66,15 @@ class HC1CardWrapper extends StatelessWidget {
 
 class HC1Card extends StatelessWidget {
   final Cards card;
-  const HC1Card({super.key, required this.card});
+  final double height; // Add height field
+  const HC1Card({super.key, required this.card, this.height = 64});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => _handleCardTap(card, context),
       child: Container(
-        height: 64,
+        height: height, // Use the height field
         decoration: BoxDecoration(
           color: _parseColor(card.bgColor) ?? Colors.white,
           borderRadius: BorderRadius.circular(8),
@@ -173,7 +187,8 @@ class HC1Card extends StatelessWidget {
 // HC3 - Big Display Card with Action
 class HC3Card extends StatefulWidget {
   final Cards card;
-  const HC3Card({super.key, required this.card});
+  final double? height; // Add height parameter
+  const HC3Card({super.key, required this.card, this.height});
 
   @override
   State<HC3Card> createState() => _HC3CardState();
@@ -205,8 +220,10 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final cardHeight = widget.height ?? 350.0; // Use API height or default
+
     return SizedBox(
-      height: 350,
+      height: cardHeight,
       child: Stack(
         children: [
           if (_showActions)
@@ -215,7 +232,7 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
               top: 0,
               bottom: 0,
               child: Container(
-                height: 350,
+                height: cardHeight,
                 width: 120,
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -259,7 +276,7 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
                       _handleCardTap(widget.card, context);
                     }
                   },
-                  child: _buildMainCard(),
+                  child: _buildMainCard(cardHeight),
                 ),
               );
             },
@@ -323,12 +340,10 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
     _controller.reverse();
   }
 
-  Widget _buildMainCard() {
+  Widget _buildMainCard(double cardHeight) {
     return Container(
-      height: 350, // Fixed height
-      margin: const EdgeInsets.symmetric(
-        horizontal: 20,
-      ), // Remove vertical margin
+      height: cardHeight, // Use dynamic height
+      margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         gradient:
@@ -377,7 +392,7 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
                     (context, url, error) => Container(
                       width: 40,
                       height: 40,
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withValues(alpha: 0.3),
                     ),
               ),
               const SizedBox(height: 16),
@@ -483,14 +498,17 @@ class HC5Card extends StatelessWidget {
 // HC6 - Small Card with Arrow
 class HC6Card extends StatelessWidget {
   final Cards card;
-  const HC6Card({super.key, required this.card});
+  final double? height;
+  const HC6Card({super.key, required this.card, this.height});
 
   @override
   Widget build(BuildContext context) {
+    final cardHeight = height ?? 60.0;
+
     return GestureDetector(
       onTap: () => _handleCardTap(card, context),
       child: Container(
-        height: 60,
+        height: cardHeight,
         width: double.infinity,
         margin: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
@@ -547,22 +565,24 @@ class HC9Group extends StatelessWidget {
   final List<Cards> cards;
   final bool isScrollable;
   final bool isFullWidth;
+  final double? height; // Add height parameter
 
   const HC9Group({
     super.key,
     required this.cards,
     this.isScrollable = false,
     this.isFullWidth = false,
+    this.height,
   });
 
   @override
   Widget build(BuildContext context) {
-    const double fixedHeight = 195;
+    final cardHeight = height ?? 195.0; // Use API height or default
 
     final content = Row(
       children:
           cards.map((card) {
-            return HC9Card(card: card);
+            return HC9Card(card: card, height: cardHeight);
           }).toList(),
     );
 
@@ -581,21 +601,22 @@ class HC9Group extends StatelessWidget {
 
 class HC9Card extends StatelessWidget {
   final Cards card;
+  final double? height; // Add height parameter
 
-  const HC9Card({super.key, required this.card});
+  const HC9Card({super.key, required this.card, this.height});
 
   @override
   Widget build(BuildContext context) {
-    const double fixedHeight = 195;
+    final cardHeight = height ?? 195.0; // Use API height or default
     final double cardWidth =
         card.bgImage?.aspectRatio != null
-            ? fixedHeight * card.bgImage!.aspectRatio!
-            : fixedHeight * 0.8;
+            ? cardHeight * card.bgImage!.aspectRatio!
+            : cardHeight * 0.8;
 
     return Container(
-      height: fixedHeight,
+      height: cardHeight, // Use dynamic height
       width: cardWidth,
-      margin: const EdgeInsets.only(right: 15), // spacing between cards
+      margin: const EdgeInsets.only(right: 15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         gradient:

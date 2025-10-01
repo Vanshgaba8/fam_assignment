@@ -79,6 +79,7 @@ class _GroupWidget extends StatelessWidget {
       cards: cards,
       height: group.height,
       isScrollable: isScrollable,
+      isFullWidth: group.isFullWidth ?? false,
     );
 
     if (isScrollable && designType != 'HC9') {
@@ -96,12 +97,14 @@ class _CardsRow extends StatelessWidget {
   final List<Cards> cards;
   final int? height;
   final bool isScrollable;
+  final bool isFullWidth;
 
   const _CardsRow({
     required this.designType,
     required this.cards,
     this.height,
     this.isScrollable = false,
+    this.isFullWidth = false,
   });
 
   @override
@@ -113,11 +116,20 @@ class _CardsRow extends StatelessWidget {
       return Expanded(child: cardWidget);
     }
 
+    final groupHeight = height?.toDouble();
+
     switch (designType) {
       case 'HC1':
-        return HC1CardWrapper(cards: cards, isScrollable: isScrollable);
+        return HC1CardWrapper(
+          cards: cards,
+          isScrollable: isScrollable,
+          height: groupHeight,
+        );
       case 'HC3':
-        return Column(children: cards.map((c) => HC3Card(card: c)).toList());
+        return Column(
+          children:
+              cards.map((c) => HC3Card(card: c, height: groupHeight)).toList(),
+        );
       case 'HC5':
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,18 +138,19 @@ class _CardsRow extends StatelessWidget {
       case 'HC6':
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: cards.map((c) => cardWrapper(HC6Card(card: c))).toList(),
+          children:
+              cards
+                  .map(
+                    (c) => cardWrapper(HC6Card(card: c, height: groupHeight)),
+                  )
+                  .toList(),
         );
       case 'HC9':
-        final h = (height ?? 120).toDouble();
-        return SizedBox(
-          height: h,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: cards.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (context, index) => HC9Card(card: cards[index]),
-          ),
+        return HC9Group(
+          cards: cards,
+          isScrollable: isScrollable,
+          isFullWidth: isFullWidth,
+          height: groupHeight,
         );
       default:
         return Column(
