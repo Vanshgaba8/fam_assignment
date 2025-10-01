@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:fam_assignment/models/card_model.dart';
 
 /*
@@ -92,6 +94,11 @@ class FormattedTextWidget extends StatelessWidget {
 
     return TextSpan(
       text: entity.text ?? '',
+      recognizer:
+          (entity as dynamic).url != null && (entity as dynamic).url!.isNotEmpty
+              ? (TapGestureRecognizer()
+                ..onTap = () => _handleEntityTap(entity.url!))
+              : null,
       style: (baseStyle ?? const TextStyle()).copyWith(
         color: color,
         fontSize: fontSize,
@@ -104,10 +111,24 @@ class FormattedTextWidget extends StatelessWidget {
       ),
     );
   }
+
+  void _handleEntityTap(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint('Could not launch $url');
+      }
+    } catch (e) {
+      debugPrint('Error launching URL: $e');
+    }
+  }
 }
 
-// import 'package:flutter/material.dart';
 // import 'package:flutter/gestures.dart';
+// import 'package:flutter/material.dart';
+// import 'package:url_launcher/url_launcher.dart';
 // import 'package:fam_assignment/models/card_model.dart';
 //
 // class FormattedTextWidget extends StatelessWidget {
@@ -204,6 +225,11 @@ class FormattedTextWidget extends StatelessWidget {
 //
 //     return TextSpan(
 //       text: entity.text ?? '',
+//       recognizer:
+//       (entity as dynamic).url != null && (entity as dynamic).url!.isNotEmpty
+//           ? (TapGestureRecognizer()
+//         ..onTap = () => _handleEntityTap(entity.url!))
+//           : null,
 //       style: (baseStyle ?? const TextStyle()).copyWith(
 //         color: color,
 //         fontSize: fontSize,
@@ -215,5 +241,18 @@ class FormattedTextWidget extends StatelessWidget {
 //             : FontWeight.normal,
 //       ),
 //     );
+//   }
+//
+//   void _handleEntityTap(String url) async {
+//     try {
+//       final uri = Uri.parse(url);
+//       if (await canLaunchUrl(uri)) {
+//         await launchUrl(uri, mode: LaunchMode.externalApplication);
+//       } else {
+//         debugPrint('Could not launch $url');
+//       }
+//     } catch (e) {
+//       debugPrint('Error launching URL: $e');
+//     }
 //   }
 // }

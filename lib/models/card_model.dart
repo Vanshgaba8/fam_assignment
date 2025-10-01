@@ -265,6 +265,7 @@ class Entity {
   int? fontSize;
   String? fontStyle;
   String? fontFamily;
+  String? url;
 
   Entity({
     this.text,
@@ -273,6 +274,7 @@ class Entity {
     this.fontSize,
     this.fontStyle,
     this.fontFamily,
+    this.url,
   });
 
   Entity.fromJson(Map<String, dynamic> json) {
@@ -282,6 +284,7 @@ class Entity {
     fontSize = json['font_size'];
     fontStyle = json['font_style'];
     fontFamily = json['font_family'];
+    url = json['url'];
   }
 
   Map<String, dynamic> toJson() {
@@ -292,6 +295,7 @@ class Entity {
     data['font_size'] = fontSize;
     data['font_style'] = fontStyle;
     data['font_family'] = fontFamily;
+    data['url'] = url;
     return data;
   }
 }

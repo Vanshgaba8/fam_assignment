@@ -2,7 +2,7 @@
 
 ## 📱 APK Download
 
-👉 [Download APK](https://drive.google.com/file/d/14exloO99-AjZZooFjWWcnknwHHi0c2QX/view?usp=drive_link)
+👉 [Download APK](https://drive.google.com/file/d/1LNH7sFWL6NLmRbVeaFGNbpdWB-qbt_6g/view?usp=sharing)
 
 ---
 
