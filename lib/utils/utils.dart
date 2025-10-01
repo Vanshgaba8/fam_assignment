@@ -12,7 +12,10 @@ class Utils {
   }
 
   static void fieldFocusChange(
-      BuildContext context, FocusNode current, FocusNode nextFocus) {
+    BuildContext context,
+    FocusNode current,
+    FocusNode nextFocus,
+  ) {
     current.unfocus();
     FocusScope.of(context).requestFocus(nextFocus);
   }
@@ -29,11 +32,7 @@ class Utils {
       backgroundColor: Colors.red,
       reverseAnimationCurve: Curves.easeInOut,
       positionOffset: 20,
-      icon: Icon(
-        Icons.error,
-        size: 28,
-        color: Colors.white,
-      ),
+      icon: Icon(Icons.error, size: 28, color: Colors.white),
     ).show(context);
   }
 
@@ -49,29 +48,23 @@ class Utils {
       backgroundColor: Colors.green,
       reverseAnimationCurve: Curves.easeInOut,
       positionOffset: 20,
-      icon: Icon(
-        Icons.check_circle,
-        size: 28,
-        color: Colors.white,
-      ),
+      icon: Icon(Icons.check_circle, size: 28, color: Colors.white),
     ).show(context);
   }
 
   static errorSnackBar(String message, BuildContext context) {
     return ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.red,
-        content: Text(message),
-      ),
+      SnackBar(backgroundColor: Colors.red, content: Text(message)),
     );
   }
 
   static successSnackBar(String message, BuildContext context) {
     return ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.green,
-        content: Text(message),
-      ),
+      SnackBar(backgroundColor: Colors.green, content: Text(message)),
     );
   }
+}
+
+extension SizeExtension on num {
+  double get px => toDouble();
 }
