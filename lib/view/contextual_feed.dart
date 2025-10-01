@@ -151,10 +151,25 @@ class _CardsRow extends StatelessWidget {
           );
         }
       case 'HC5':
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: cards.map((c) => cardWrapper(HC5Card(card: c))).toList(),
-        );
+        if (isScrollable && cards.length > 1) {
+          // Multiple HC5 cards with horizontal scrolling
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children:
+                  cards
+                      .map((c) => SizedBox(width: 250, child: HC5Card(card: c)))
+                      .toList(),
+            ),
+          );
+        } else {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:
+                cards.map((c) => Expanded(child: HC5Card(card: c))).toList(),
+          );
+        }
       case 'HC6':
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
