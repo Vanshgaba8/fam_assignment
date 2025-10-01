@@ -333,34 +333,32 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
               ),
               const SizedBox(height: 16),
             ],
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FormattedTextWidget(
-                    formattedTitle: widget.card.formattedTitle,
-                    fallbackText: widget.card.title,
-                    baseStyle: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  FormattedTextWidget(
-                    formattedTitle: widget.card.formattedDescription,
-                    fallbackText: widget.card.description,
-                    baseStyle: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
+
+            // Take all space and push text+button to bottom
+            const Spacer(),
+
+            // Text from API (title + description)
+            FormattedTextWidget(
+              formattedTitle: widget.card.formattedTitle,
+              fallbackText: widget.card.title,
+              baseStyle: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
+            const SizedBox(height: 8),
+            FormattedTextWidget(
+              formattedTitle: widget.card.formattedDescription,
+              fallbackText: widget.card.description,
+              baseStyle: const TextStyle(fontSize: 16, color: Colors.white70),
+            ),
+            const SizedBox(height: 4),
+
+            // Button at bottom-left
             if (widget.card.cta != null && widget.card.cta!.isNotEmpty)
               Align(
-                alignment: Alignment.centerRight,
+                alignment: Alignment.bottomLeft,
                 child: ElevatedButton(
                   onPressed:
                       () => _handleCtaTap(widget.card.cta!.first, context),
@@ -373,7 +371,7 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(widget.card.cta!.first.text ?? 'Action'),
+                  child: Text(widget.card.cta!.first.text ?? ''),
                 ),
               ),
           ],
