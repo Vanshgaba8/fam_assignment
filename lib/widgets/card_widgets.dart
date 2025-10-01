@@ -99,52 +99,64 @@ class HC1Card extends StatelessWidget {
             // TEXT BLOCK
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center, // vertical center
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize:
+                    MainAxisSize
+                        .min, // Prevent column from taking too much space
                 children: [
-                  FormattedTextWidget(
-                    formattedTitle: card.formattedTitle,
-                    fallbackText: card.title,
-                    baseStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                  // Title text
+                  Flexible(
+                    child: FormattedTextWidget(
+                      formattedTitle: card.formattedTitle,
+                      fallbackText: card.title,
+                      baseStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   if (card.formattedDescription != null ||
                       card.description != null) ...[
                     const SizedBox(height: 2),
-                    FormattedTextWidget(
-                      formattedTitle: card.formattedDescription,
-                      fallbackText: card.description,
-                      baseStyle: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
+                    Flexible(
+                      child: FormattedTextWidget(
+                        formattedTitle: card.formattedDescription,
+                        fallbackText: card.description,
+                        baseStyle: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
                       ),
                     ),
                   ],
                   if (card.cta != null && card.cta!.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    ElevatedButton(
-                      onPressed: () => _handleCtaTap(card.cta!.first, context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            _parseColor(card.cta!.first.bgColor) ??
-                            Colors.black,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                    Flexible(
+                      child: ElevatedButton(
+                        onPressed:
+                            () => _handleCtaTap(card.cta!.first, context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              _parseColor(card.cta!.first.bgColor) ??
+                              Colors.black,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          minimumSize: const Size(0, 32),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
                         ),
-                        minimumSize: const Size(0, 32), // fits 64px height
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+                        child: Text(
+                          card.cta!.first.text ?? 'Action',
+                          style: const TextStyle(fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      child: Text(
-                        card.cta!.first.text ?? 'Action',
-                        style: const TextStyle(fontSize: 12),
                       ),
                     ),
                   ],
