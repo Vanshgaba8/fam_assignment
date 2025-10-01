@@ -565,7 +565,7 @@ class HC9Group extends StatelessWidget {
   final List<Cards> cards;
   final bool isScrollable;
   final bool isFullWidth;
-  final double? height; // Add height parameter
+  final double? height;
 
   const HC9Group({
     super.key,
@@ -577,7 +577,7 @@ class HC9Group extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardHeight = height ?? 195.0; // Use API height or default
+    final cardHeight = height ?? 195.0;
 
     final content = Row(
       children:
@@ -588,13 +588,10 @@ class HC9Group extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(left: 20.0),
-      child:
-          isScrollable
-              ? SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: content,
-              )
-              : content,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: content,
+      ),
     );
   }
 }
