@@ -94,13 +94,6 @@ flutter run
 
 ---
 
-## 📌 Notes
-
-* The **FamPay logo** is **not part** of the container (only part of the parent screen).
-* The container independently manages contextual card rendering.
-
----
-
 ## 🎥 Demo / Screenshots
 
 <p align="center">
@@ -116,3 +109,4 @@ flutter run
 **Vansh Gaba**
 
 ---
+
