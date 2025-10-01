@@ -6,6 +6,7 @@ import 'package:fam_assignment/models/card_model.dart';
 import 'package:fam_assignment/view_model/feed_view_model.dart';
 import 'package:fam_assignment/widgets/formatted_text_widget.dart';
 import 'package:fam_assignment/utils/utils.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 // HC1 - Small Display Card
 class HC1CardWrapper extends StatelessWidget {
@@ -167,45 +168,87 @@ class HC3Card extends StatefulWidget {
 }
 
 class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<Offset> _slideAnimation;
-  bool _isSliding = false;
+  late AnimationController _controller;
+  late Animation<double> _slideAnimation;
+  bool _showActions = false;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
+    _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0.3, 0),
-    ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
+    _slideAnimation = Tween<double>(
+      begin: 0.0,
+      end: 120.0, // Slide right by 120 pixels to reveal left-side actions
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: _handleLongPress,
-      onTap: () => _handleCardTap(widget.card, context),
+    return SizedBox(
+      height: 350,
       child: Stack(
         children: [
-          if (_isSliding) _buildActionButtons(),
+          if (_showActions)
+            Positioned(
+              left: 20,
+              top: 0,
+              bottom: 0,
+              child: Container(
+                height: 350,
+                width: 120,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildActionButton(
+                      icon: 'assets/images/bell.svg',
+                      label: 'remind later',
+                      onTap: _handleRemindLater,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildActionButton(
+                      icon: 'assets/images/dismiss.svg',
+                      label: 'dismiss now',
+                      onTap: _handleDismissNow,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          // Main card with slide animation
           AnimatedBuilder(
             animation: _slideAnimation,
             builder: (context, child) {
               return Transform.translate(
-                offset: _slideAnimation.value,
-                child: _buildMainCard(),
+                offset: Offset(_slideAnimation.value, 0),
+                child: GestureDetector(
+                  onLongPress: () {
+                    setState(() => _showActions = true);
+                    _controller.forward();
+                  },
+                  onTap: () {
+                    if (_showActions) {
+                      setState(() => _showActions = false);
+                      _controller.reverse();
+                    } else {
+                      _handleCardTap(widget.card, context);
+                    }
+                  },
+                  child: _buildMainCard(),
+                ),
               );
             },
           ),
@@ -214,71 +257,66 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildActionButtons() {
-    return Positioned(
-      left: 0,
-      top: 0,
-      bottom: 0,
-      child: Container(
-        width: 120,
-        decoration: BoxDecoration(
-          color: Colors.grey[800],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildActionButton(
-              icon: Icons.schedule,
-              label: 'Remind later',
-              onTap: () => _handleRemindLater(),
-            ),
-            const SizedBox(height: 16),
-            _buildActionButton(
-              icon: Icons.close,
-              label: 'Dismiss now',
-              onTap: () => _handleDismissNow(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildActionButton({
-    required IconData icon,
+    required String icon,
     required String label,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: Colors.white, size: 20),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
+            child: Center(child: SvgPicture.asset(icon, width: 24, height: 24)),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
 
+  void _handleRemindLater() {
+    final vm = context.read<FeedViewModel>();
+    vm.remindLater(widget.card.id ?? -1);
+    setState(() => _showActions = false);
+    _controller.reverse();
+  }
+
+  void _handleDismissNow() {
+    final vm = context.read<FeedViewModel>();
+    vm.dismissNow(widget.card.id ?? -1);
+    setState(() => _showActions = false);
+    _controller.reverse();
+  }
+
   Widget _buildMainCard() {
     return Container(
-      height: 350.px,
-      width: double.infinity,
-      margin: EdgeInsets.symmetric(horizontal: 20.px, vertical: 24.px),
+      height: 350, // Fixed height
+      margin: const EdgeInsets.symmetric(
+        horizontal: 20,
+      ), // Remove vertical margin
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         gradient:
@@ -307,7 +345,6 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
                 : null,
       ),
       child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,16 +365,12 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
                     (context, url, error) => Container(
                       width: 40,
                       height: 40,
-                      color: Colors.white.withValues(alpha: 0.3),
+                      color: Colors.white.withOpacity(0.3),
                     ),
               ),
               const SizedBox(height: 16),
             ],
-
-            // Take all space and push text+button to bottom
             const Spacer(),
-
-            // Text from API (title + description)
             FormattedTextWidget(
               formattedTitle: widget.card.formattedTitle,
               fallbackText: widget.card.title,
@@ -354,57 +387,24 @@ class _HC3CardState extends State<HC3Card> with SingleTickerProviderStateMixin {
               baseStyle: const TextStyle(fontSize: 16, color: Colors.white70),
             ),
             const SizedBox(height: 4),
-
-            // Button at bottom-left
             if (widget.card.cta != null && widget.card.cta!.isNotEmpty)
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: ElevatedButton(
-                  onPressed:
-                      () => _handleCtaTap(widget.card.cta!.first, context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _parseColor(widget.card.cta!.first.bgColor) ??
-                        Colors.black,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+              ElevatedButton(
+                onPressed: () => _handleCtaTap(widget.card.cta!.first, context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      _parseColor(widget.card.cta!.first.bgColor) ??
+                      Colors.black,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(widget.card.cta!.first.text ?? ''),
                 ),
+                child: Text(widget.card.cta!.first.text ?? ''),
               ),
           ],
         ),
       ),
     );
-  }
-
-  void _handleLongPress() {
-    setState(() {
-      _isSliding = true;
-    });
-    _animationController.forward();
-  }
-
-  void _handleRemindLater() {
-    final vm = context.read<FeedViewModel>();
-    vm.remindLater(widget.card.id ?? -1);
-    _resetCard();
-  }
-
-  void _handleDismissNow() {
-    final vm = context.read<FeedViewModel>();
-    vm.dismissNow(widget.card.id ?? -1);
-    _resetCard();
-  }
-
-  void _resetCard() {
-    _animationController.reverse().then((_) {
-      setState(() {
-        _isSliding = false;
-      });
-    });
   }
 }
 
