@@ -653,16 +653,29 @@ void _handleCtaTap(Cta cta, BuildContext context) {
 
 Future<void> _launchUrl(String url, BuildContext context) async {
   try {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not launch $url')));
+    String formattedUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      formattedUrl = 'https://$url';
+    }
+
+    final uri = Uri.parse(formattedUrl);
+
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+    if (!launched) {
+      final fallbackLaunched = await launchUrl(
+        uri,
+        mode: LaunchMode.platformDefault,
+      );
+
+      if (!fallbackLaunched) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $formattedUrl')),
+        );
+      }
     }
   } catch (e) {
-    debugPrint(e.toString());
+    debugPrint('Error launching URL: $e');
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Error launching URL: $e')));
