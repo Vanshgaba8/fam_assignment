@@ -126,10 +126,30 @@ class _CardsRow extends StatelessWidget {
           height: groupHeight,
         );
       case 'HC3':
-        return Column(
-          children:
-              cards.map((c) => HC3Card(card: c, height: groupHeight)).toList(),
-        );
+        if (isScrollable && cards.length > 1) {
+          // Multiple HC3 cards with horizontal scrolling
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children:
+                  cards
+                      .map(
+                        (c) => SizedBox(
+                          width: 300, // Fixed width for horizontal scrolling
+                          child: HC3Card(card: c, height: groupHeight),
+                        ),
+                      )
+                      .toList(),
+            ),
+          );
+        } else {
+          return Column(
+            children:
+                cards
+                    .map((c) => HC3Card(card: c, height: groupHeight))
+                    .toList(),
+          );
+        }
       case 'HC5':
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
