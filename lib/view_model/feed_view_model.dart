@@ -5,25 +5,26 @@ import 'package:fam_assignment/repository/feed_repository.dart';
 
 class FeedViewModel extends ChangeNotifier {
   final FeedRepository _repository;
-  FeedViewModel({FeedRepository? repository})
-    : _repository = repository ?? FeedRepository();
 
   bool _isLoading = false;
   String? _errorMessage;
   List<HcGroups> _groups = [];
 
-  static const String _dismissedKey = 'dismissed_card_ids';
-  static const String _remindLaterKey = 'remind_later_card_ids';
+  Set<int> _dismissedCardIds = <int>{};
 
-  Set<int> _dismissedIds = <int>{};
-  Set<int> _remindLaterIds = <int>{};
+  Set<int> _remindLaterCardIds = <int>{};
+
+  FeedViewModel({FeedRepository? repository})
+    : _repository = repository ?? FeedRepository() {
+    _loadDismissedCards();
+  }
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   List<HcGroups> get groups => _filteredGroups();
 
   Future<void> initialize() async {
-    await _loadPrefs();
+    await _loadDismissedCards();
     await refresh();
   }
 
@@ -39,36 +40,67 @@ class FeedViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> _loadDismissedCards() async {
+    final prefs = await SharedPreferences.getInstance();
+    final dismissedList = prefs.getStringList('dismissed_card_ids') ?? [];
+    _dismissedCardIds =
+        dismissedList
+            .map((e) => int.tryParse(e) ?? -1)
+            .where((id) => id != -1)
+            .toSet();
+  }
+
+  Future<void> _saveDismissedCards() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      'dismissed_card_ids',
+      _dismissedCardIds.map((e) => e.toString()).toList(),
+    );
+  }
+
+  // Remind later
   void remindLater(int cardId) {
-    _remindLaterIds.add(cardId);
+    _remindLaterCardIds.add(cardId);
     notifyListeners();
-    _savePrefs();
   }
 
+  // Dismiss now
   void dismissNow(int cardId) {
-    _dismissedIds.add(cardId);
-    _remindLaterIds.remove(cardId);
+    _dismissedCardIds.add(cardId);
+    _remindLaterCardIds.remove(
+      cardId,
+    ); // Remove from remind later if it was there
+    _saveDismissedCards();
     notifyListeners();
-    _savePrefs();
   }
 
+  // Clear remind later cards on app restart
   void clearSessionReminders() {
-    _remindLaterIds.clear();
+    _remindLaterCardIds.clear();
     notifyListeners();
+  }
+
+  // Check visibility based on both factors
+  bool isCardVisible(int cardId) {
+    // Hide if dismissed
+    if (_dismissedCardIds.contains(cardId)) return false;
+    // Hide if remind later
+    if (_remindLaterCardIds.contains(cardId)) return false;
+    return true;
   }
 
   List<HcGroups> _filteredGroups() {
     if (_groups.isEmpty) return _groups;
+
     final List<HcGroups> filtered = [];
     for (final group in _groups) {
-      final cards =
-          (group.cards ?? []).where((c) {
-            final id = c.id ?? -1;
-            if (_dismissedIds.contains(id)) return false;
-            if (_remindLaterIds.contains(id)) return false;
-            return true;
+      final visibleCards =
+          (group.cards ?? []).where((card) {
+            final cardId = card.id ?? -1;
+            return isCardVisible(cardId);
           }).toList();
-      if (cards.isNotEmpty) {
+
+      if (visibleCards.isNotEmpty) {
         filtered.add(
           HcGroups(
             id: group.id,
@@ -80,32 +112,12 @@ class FeedViewModel extends ChangeNotifier {
             isFullWidth: group.isFullWidth,
             slug: group.slug,
             level: group.level,
-            cards: cards,
+            cards: visibleCards,
           ),
         );
       }
     }
     return filtered;
-  }
-
-  Future<void> _loadPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    _dismissedIds =
-        (prefs.getStringList(_dismissedKey) ?? []).map(int.parse).toSet();
-    _remindLaterIds =
-        (prefs.getStringList(_remindLaterKey) ?? []).map(int.parse).toSet();
-  }
-
-  Future<void> _savePrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-      _dismissedKey,
-      _dismissedIds.map((e) => e.toString()).toList(),
-    );
-    await prefs.setStringList(
-      _remindLaterKey,
-      _remindLaterIds.map((e) => e.toString()).toList(),
-    );
   }
 
   void _setLoading(bool value) {

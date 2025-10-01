@@ -16,7 +16,9 @@ class _ContextualFeedState extends State<ContextualFeed> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<FeedViewModel>().initialize();
+      final vm = context.read<FeedViewModel>();
+      vm.clearSessionReminders();
+      vm.initialize();
     });
   }
 
