@@ -115,10 +115,7 @@ class _CardsRow extends StatelessWidget {
 
     switch (designType) {
       case 'HC1':
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: cards.map((c) => cardWrapper(HC1Card(card: c))).toList(),
-        );
+        return HC1CardWrapper(cards: cards, isScrollable: isScrollable);
       case 'HC3':
         return Column(children: cards.map((c) => HC3Card(card: c)).toList());
       case 'HC5':
